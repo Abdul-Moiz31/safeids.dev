@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Editor from '@monaco-editor/react'
 import type { Monaco } from '@monaco-editor/react'
+import { Wand2, AlertCircle } from 'lucide-react'
 import {
   setupTypeScriptEnvironment,
   getTypeErrors,
@@ -24,16 +25,14 @@ type OrderId = brand<string, 'OrderId'>
 const userId  = createId<UserId>('usr')
 const orderId = createId<OrderId>('ord')
 
-// This function expects a UserId
 function getUser(id: UserId): void {
   console.log('Getting user:', id)
 }
 
-// BUG: passing orderId where userId is expected
+// Type error: OrderId not assignable to UserId
 getUser(orderId)
-//      ^^^^^^^ Type error here
 
-// This is correct:
+// Correct usage
 getUser(userId)
 `
 
@@ -49,14 +48,11 @@ function getUser(id: UserId): void {
   console.log('Getting user:', id)
 }
 
-// FIXED: passing userId correctly
-getUser(userId)
-//      ^^^^^^ ✓ Type-safe
-
 function getOrder(id: OrderId): void {
   console.log('Getting order:', id)
 }
 
+getUser(userId)
 getOrder(orderId)
 `
 
@@ -66,7 +62,6 @@ export function Playground({ entities }: PlaygroundProps) {
   const [selectedSnippet, setSelectedSnippet] =
     useState<(typeof SAMPLE_SNIPPETS)[number]>('Basic ID mixup')
   const editorRef = useRef<any>(null)
-  const monacoRef = useRef<Monaco | null>(null)
 
   const generatedTypes = generateTypesCode(entities)
 
@@ -82,32 +77,37 @@ export function Playground({ entities }: PlaygroundProps) {
 
   const handleEditorMount = (editor: any, monaco: Monaco) => {
     editorRef.current = editor
-    monacoRef.current = monaco
 
-    monaco.editor.defineTheme('safeids-modern', {
+    monaco.editor.defineTheme('clean', {
+      base: 'vs',
+      inherit: true,
+      rules: [],
+      colors: {
+        'editor.background': '#ffffff',
+        'editor.foreground': '#0a0a0a',
+        'editorError.foreground': '#dc2626',
+      },
+    })
+
+    monaco.editor.defineTheme('clean-dark', {
       base: 'vs-dark',
       inherit: true,
       rules: [],
       colors: {
-        'editor.background': '#252d3d',
-        'editor.foreground': '#f8f9fa',
-        'editorLineNumber.foreground': '#6b7280',
-        'editorCursor.foreground': '#6366f1',
-        'editor.selectionBackground': '#6366f133',
+        'editor.background': '#0a0a0a',
+        'editor.foreground': '#ffffff',
         'editorError.foreground': '#ef4444',
-        'editorError.squigglyLineBackground': '#ef444433',
       },
     })
 
-    monaco.editor.setTheme('safeids-modern')
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    monaco.editor.setTheme(prefersDark ? 'clean-dark' : 'clean')
 
     const libSource = [
       'declare const __brand: unique symbol',
       'export type Brand<T, TBrand extends string> = T & { readonly [__brand]: TBrand }',
       'export type brand<T, TBrand extends string> = Brand<T, TBrand>',
       'export function createId<T extends Brand<string, string>>(prefix?: string): T',
-      'export function fromString<T extends Brand<string, string>>(value: string, prefix?: string): T',
-      'export function isId<T extends Brand<string, string>>(val: unknown, prefix?: string): val is T',
     ].join('\n')
 
     monaco.languages.typescript.typescriptDefaults.addExtraLib(libSource, 'node_modules/safeids/index.d.ts')
@@ -121,13 +121,7 @@ export function Playground({ entities }: PlaygroundProps) {
 
   const handleSnippetChange = (snippet: (typeof SAMPLE_SNIPPETS)[number]) => {
     setSelectedSnippet(snippet)
-    const snippetCode = getSampleCode(snippet)
-    setCode(snippetCode)
-    setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.layout()
-      }
-    }, 100)
+    setCode(getSampleCode(snippet))
   }
 
   const handleFixBug = () => {
@@ -143,96 +137,84 @@ export function Playground({ entities }: PlaygroundProps) {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="pb-6 mb-6 border-b border-border-subtle flex items-center justify-between">
+    <div className="h-full flex flex-col p-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h3 className="text-sm uppercase tracking-widest font-bold text-text-primary mb-2">Playground</h3>
-          <p className="text-xs text-text-tertiary">Live type checking with Monaco</p>
+          <h3 className="font-semibold text-sm mb-1">Live Editor</h3>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">Click errors to navigate</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <select
-            value={selectedSnippet}
-            onChange={(e) => handleSnippetChange(e.target.value as (typeof SAMPLE_SNIPPETS)[number])}
-            className="text-xs px-3 py-2 bg-bg-tertiary border border-border-subtle rounded text-text-secondary hover:text-text-primary cursor-pointer transition-all"
-          >
-            {SAMPLE_SNIPPETS.map((snippet) => (
-              <option key={snippet} value={snippet}>
-                {snippet}
-              </option>
-            ))}
-          </select>
-
-          <button
-            onClick={handleFixBug}
-            className="text-xs px-3 py-2 bg-accent-primary/10 text-accent-primary rounded hover:bg-accent-primary/20 transition-colors font-medium border border-accent-primary/20"
-          >
-            Fix Bug
-          </button>
-        </div>
+        <select
+          value={selectedSnippet}
+          onChange={(e) => handleSnippetChange(e.target.value as (typeof SAMPLE_SNIPPETS)[number])}
+          className="px-3 py-1.5 text-xs border border-neutral-200 dark:border-neutral-800 rounded bg-white dark:bg-black hover:bg-neutral-50 dark:hover:bg-neutral-900 cursor-pointer"
+        >
+          {SAMPLE_SNIPPETS.map((snippet) => (
+            <option key={snippet} value={snippet}>
+              {snippet}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {/* Monaco Editor */}
-      <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-border-subtle mb-4 shadow-md">
+      <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-800 mb-4">
         <Editor
           height="100%"
           language="typescript"
           value={code}
           onChange={handleCodeChange}
           onMount={handleEditorMount}
-          theme="safeids-modern"
           options={{
             minimap: { enabled: false },
             lineNumbers: 'on',
-            scrollbar: { useShadows: false, verticalHasArrows: false },
+            scrollbar: { useShadows: false },
             fontSize: 13,
-            fontFamily: "'JetBrains Mono', monospace",
+            fontFamily: "'Geist Mono', monospace",
             lineHeight: 1.6,
             wordWrap: 'on',
             automaticLayout: true,
             tabSize: 2,
-            padding: { top: 16, bottom: 16 },
-            scrollBeyondLastLine: false,
+            padding: { top: 12, bottom: 12 },
           }}
         />
       </div>
 
-      {/* Errors Panel */}
-      <div className="border-t border-border-subtle pt-4">
+      {/* Errors */}
+      <div>
         {errors.length === 0 ? (
-          <div className="flex items-center gap-2">
-            <div className="text-xs px-3 py-1.5 bg-success/20 text-success rounded-full font-mono font-semibold">
-              ✓ No type errors
-            </div>
+          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+            <div className="w-2 h-2 bg-green-600 dark:bg-green-400 rounded-full"></div>
+            No errors
           </div>
         ) : (
           <div className="space-y-2">
-            <div className="text-xs text-text-tertiary font-semibold mb-2">
-              <span className="inline-block px-2 py-1 bg-error/20 text-error rounded font-mono">
-                {errors.length} {errors.length === 1 ? 'error' : 'errors'}
-              </span>
+            <div className="text-xs font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-2">
+              <AlertCircle size={14} />
+              {errors.length} error{errors.length !== 1 ? 's' : ''}
             </div>
-
-            <div className="space-y-1 max-h-40 overflow-y-auto">
+            <div className="space-y-1 max-h-24 overflow-y-auto">
               {errors.map((error, idx) => (
                 <button
                   key={idx}
                   onClick={() => goToError(error.line)}
-                  className="w-full flex items-start gap-3 px-3 py-2 bg-bg-tertiary hover:bg-bg-hover rounded transition-colors text-left group cursor-pointer border border-border-subtle"
+                  className="w-full text-left flex items-start gap-3 px-2 py-1.5 hover:bg-neutral-100 dark:hover:bg-neutral-900 rounded text-xs"
                 >
-                  <span className="text-xs font-mono font-bold text-accent-primary mt-0.5 flex-shrink-0">
-                    {error.line}
-                  </span>
-                  <span className="text-xs text-text-secondary group-hover:text-text-primary transition-colors flex-1 break-words">
-                    {error.message}
-                  </span>
+                  <span className="text-neutral-500 dark:text-neutral-400 flex-shrink-0">Line {error.line}</span>
+                  <span className="text-neutral-700 dark:text-neutral-300">{error.message}</span>
                 </button>
               ))}
             </div>
           </div>
         )}
       </div>
+
+      <button
+        onClick={handleFixBug}
+        className="mt-4 flex items-center justify-center gap-2 w-full px-4 py-2 border border-neutral-200 dark:border-neutral-800 rounded hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors text-sm font-medium"
+      >
+        <Wand2 size={16} />
+        Fix the bug
+      </button>
     </div>
   )
 }

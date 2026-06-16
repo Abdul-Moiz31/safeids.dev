@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Copy, ExternalLink } from 'lucide-react'
 import type { Entity, CodeTab } from '@/lib/types'
 import { generateTypesCode, generateZodCode, generateMigrationGuide } from '@/lib/codegen'
 
@@ -32,74 +33,49 @@ export function CodeOutput({ entities }: CodeOutputProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleStackBlitz = () => {
-    const codesnippet = encodeURIComponent(generateTypesCode(entities))
-    window.open(
-      `https://stackblitz.com/edit/nextjs-14-typescript?file=app%2Fpage.tsx&embedded=1&hideExplorer=true&preset=node&devToolsHeight=0`,
-      '_blank',
-    )
-  }
-
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="pb-6 mb-6 border-b border-border-subtle">
-        <h3 className="text-sm uppercase tracking-widest font-bold text-text-primary mb-4">Generated Code</h3>
+    <div className="h-full flex flex-col p-6">
+      <div className="mb-6">
+        <h3 className="font-semibold text-sm mb-4">Generated Code</h3>
 
-        {/* Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto">
+        <div className="flex gap-2 border-b border-neutral-200 dark:border-neutral-800">
           {(['types', 'zod', 'migration'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`text-xs uppercase tracking-wider px-3 py-2 rounded transition-all whitespace-nowrap font-medium ${
+              className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === tab
-                  ? 'bg-accent-primary text-white'
-                  : 'text-text-tertiary hover:text-text-secondary border border-border-subtle'
+                  ? 'border-black dark:border-white text-neutral-900 dark:text-white'
+                  : 'border-transparent text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-300'
               }`}
             >
-              {tab === 'types' && 'Types + IDs'}
-              {tab === 'zod' && 'Zod Schemas'}
-              {tab === 'migration' && 'Migration guide'}
+              {tab === 'types' && 'Types'}
+              {tab === 'zod' && 'Zod'}
+              {tab === 'migration' && 'Guide'}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Code Block */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto">
-          {isMigration ? (
-            <div className="prose prose-invert text-sm space-y-4 pr-4">
-              <div className="text-text-secondary whitespace-pre-wrap font-mono text-xs leading-relaxed">
-                {code}
-              </div>
-            </div>
-          ) : (
-            <pre className="bg-bg-tertiary p-4 rounded-lg overflow-x-auto text-xs leading-relaxed border border-border-subtle">
-              <code className="text-accent-light font-mono">{code}</code>
-            </pre>
-          )}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex gap-2 mt-6 pt-6 border-t border-border-subtle">
-        <button
-          onClick={handleCopy}
-          className="flex-1 px-3 py-2 bg-accent-primary hover:bg-accent-dark text-white text-sm font-semibold rounded-lg transition-all active:scale-95"
-        >
-          {copied ? '✓ Copied!' : 'Copy Code'}
-        </button>
-        {!isMigration && (
-          <button
-            onClick={handleStackBlitz}
-            className="flex-1 px-3 py-2 bg-bg-tertiary hover:bg-bg-hover text-text-primary text-sm font-semibold rounded-lg transition-all border border-border-subtle"
-          >
-            StackBlitz ↗
-          </button>
+      <div className="flex-1 overflow-y-auto mb-6">
+        {isMigration ? (
+          <div className="text-sm whitespace-pre-wrap font-mono text-neutral-700 dark:text-neutral-300">
+            {code}
+          </div>
+        ) : (
+          <pre className="text-xs overflow-x-auto">
+            <code className="text-neutral-900 dark:text-neutral-100">{code}</code>
+          </pre>
         )}
       </div>
+
+      <button
+        onClick={handleCopy}
+        className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded hover:bg-neutral-800 dark:hover:bg-neutral-200 transition-colors font-medium text-sm"
+      >
+        <Copy size={16} />
+        {copied ? 'Copied!' : 'Copy'}
+      </button>
     </div>
   )
 }

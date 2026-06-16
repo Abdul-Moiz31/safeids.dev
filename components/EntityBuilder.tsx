@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Trash2, Plus } from 'lucide-react'
 import type { Entity } from '@/lib/types'
 
 interface EntityBuilderProps {
@@ -51,68 +52,63 @@ export function EntityBuilder({ entities, onEntitiesChange }: EntityBuilderProps
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="pb-6 mb-6 border-b border-border-subtle">
-        <h3 className="text-sm uppercase tracking-widest font-bold text-text-primary mb-2">Define Your Domain</h3>
-        <p className="text-xs text-text-tertiary">Create branded types for your entities</p>
-      </div>
+    <div className="h-full flex flex-col p-6">
+      <h3 className="font-semibold text-sm mb-2">Define Domain</h3>
+      <p className="text-xs text-neutral-500 dark:text-neutral-400 mb-6">Create your entity types</p>
 
-      {/* Entities List */}
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+      <div className="flex-1 overflow-y-auto space-y-4 mb-6">
         {entities.map((entity) => (
-          <div key={entity.id} className="p-4 rounded-lg bg-bg-secondary border border-border-subtle hover:border-border-muted transition-all">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-text-tertiary font-semibold mb-2">Entity Name</label>
-                <input
-                  type="text"
-                  value={entity.name}
-                  onChange={(e) => handleEntityChange(entity.id, 'name', e.target.value)}
-                  placeholder="e.g. User"
-                  className="w-full px-3 py-2 bg-bg-tertiary border border-border-subtle rounded-md text-text-primary placeholder-text-muted text-sm hover:border-border-muted focus:border-accent-primary transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-text-tertiary font-semibold mb-2">ID Field Name</label>
-                <input
-                  type="text"
-                  value={entity.fieldName}
-                  onChange={(e) => handleEntityChange(entity.id, 'fieldName', e.target.value)}
-                  placeholder="e.g. userId"
-                  className="w-full px-3 py-2 bg-bg-tertiary border border-border-subtle rounded-md text-text-primary placeholder-text-muted text-sm hover:border-border-muted focus:border-accent-primary transition-colors"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs uppercase tracking-wider text-text-tertiary font-semibold mb-2">Prefix</label>
-                <input
-                  type="text"
-                  value={entity.prefix}
-                  onChange={(e) => handleEntityChange(entity.id, 'prefix', e.target.value)}
-                  placeholder="e.g. usr"
-                  className="w-full px-3 py-2 bg-bg-tertiary border border-border-subtle rounded-md text-text-primary placeholder-text-muted text-sm hover:border-border-muted focus:border-accent-primary transition-colors"
-                />
-              </div>
-
-              <button
-                onClick={() => handleRemove(entity.id)}
-                className="w-full px-3 py-2 text-sm text-error hover:bg-error/10 rounded transition-colors font-medium"
-              >
-                ✕ Remove
-              </button>
+          <div key={entity.id} className="space-y-2 p-4 bg-white dark:bg-black border border-neutral-200 dark:border-neutral-800 rounded-lg">
+            <div>
+              <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400 block mb-1">Name</label>
+              <input
+                type="text"
+                value={entity.name}
+                onChange={(e) => handleEntityChange(entity.id, 'name', e.target.value)}
+                placeholder="User"
+                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-800 rounded bg-white dark:bg-black focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              />
             </div>
+
+            <div>
+              <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400 block mb-1">Field</label>
+              <input
+                type="text"
+                value={entity.fieldName}
+                onChange={(e) => handleEntityChange(entity.id, 'fieldName', e.target.value)}
+                placeholder="userId"
+                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-800 rounded bg-white dark:bg-black focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-neutral-600 dark:text-neutral-400 block mb-1">Prefix</label>
+              <input
+                type="text"
+                value={entity.prefix}
+                onChange={(e) => handleEntityChange(entity.id, 'prefix', e.target.value)}
+                placeholder="usr"
+                className="w-full px-3 py-2 text-sm border border-neutral-200 dark:border-neutral-800 rounded bg-white dark:bg-black focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
+              />
+            </div>
+
+            <button
+              onClick={() => handleRemove(entity.id)}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded transition-colors"
+            >
+              <Trash2 size={14} />
+              Remove
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Add Button */}
       <button
         onClick={handleAdd}
-        className="mt-6 pt-6 border-t border-border-subtle w-full px-4 py-3 bg-accent-primary/10 hover:bg-accent-primary/20 text-accent-primary rounded-lg transition-colors text-sm font-semibold"
+        className="flex items-center justify-center gap-2 w-full px-4 py-2 border border-neutral-200 dark:border-neutral-800 rounded hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors font-medium text-sm"
       >
-        + Add Entity
+        <Plus size={16} />
+        Add entity
       </button>
     </div>
   )

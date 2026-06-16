@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { IdPill } from './IdPill'
+import { Copy, ExternalLink } from 'lucide-react'
 
 export function Hero() {
   const [copied, setCopied] = useState(false)
@@ -13,52 +13,51 @@ export function Hero() {
   }
 
   return (
-    <section className="relative py-24 md:py-32 px-6 bg-gradient-to-b from-bg-secondary via-bg-primary to-bg-primary overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-accent-primary/5 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-1/3 w-96 h-96 bg-accent-primary/3 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative max-w-6xl mx-auto text-center">
-        {/* Badge */}
-        <div className="mb-8 inline-block">
-          <span className="px-4 py-2 rounded-full bg-bg-secondary border border-border-subtle text-xs uppercase tracking-widest font-semibold text-accent-primary">
-            ✨ Type-Safe ID Generation
-          </span>
-        </div>
+    <section className="w-full py-20 md:py-32 px-6 bg-white dark:bg-black">
+      <div className="max-w-4xl mx-auto text-center">
+        {/* Overline */}
+        <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400 mb-6 uppercase tracking-wide">
+          Type-Safe ID Generation
+        </p>
 
         {/* Headline */}
-        <h1 className="mb-6 text-5xl md:text-7xl font-bold bg-gradient-to-r from-text-primary to-accent-light bg-clip-text text-transparent leading-tight">
-          Stop Passing the Wrong ID
+        <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">
+          Stop passing the wrong ID
         </h1>
 
         {/* Subheading */}
-        <p className="mx-auto mb-12 text-lg md:text-xl text-text-secondary max-w-3xl leading-relaxed">
+        <p className="text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed">
           userId where orderId belongs. It compiles. It ships. It breaks in production.
-          <br />
-          <span className="font-semibold text-text-primary">safeids makes ID domain mixups a TypeScript error.</span>
+          <br className="hidden sm:block" />
+          <span className="font-semibold text-neutral-900 dark:text-neutral-100">safeids catches these mistakes at compile time.</span>
         </p>
 
-        {/* Demo Section */}
-        <div className="mx-auto mb-16 max-w-2xl">
-          <div className="p-8 rounded-2xl bg-bg-secondary border border-border-subtle shadow-lg">
-            <p className="text-xs uppercase tracking-widest text-text-tertiary font-semibold mb-6">Live Type Checking Demo</p>
+        {/* Code Example Box */}
+        <div className="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-8 mb-12 max-w-2xl mx-auto">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4 uppercase tracking-wide font-medium">
+            Before safeids
+          </p>
+          <pre className="text-sm text-left overflow-x-auto mb-4">
+            <code className="text-neutral-900 dark:text-neutral-100">{`function processOrder(userId: string, orderId: string) {
+  // Easy to mix up — no error
+  await db.orders.findOne({ id: userId })
+}
 
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
-              <IdPill label="userId" prefix="usr" accentColor="indigo" />
+processOrder(order.id, user.id)  // Bug: silent failure ❌`}</code>
+          </pre>
 
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-0.5 bg-error/50"></div>
-                <span className="text-xs font-bold text-error uppercase">Type Error</span>
-              </div>
+          <div className="border-t border-neutral-200 dark:border-neutral-800 pt-4 mt-4">
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-4 uppercase tracking-wide font-medium">
+              After safeids
+            </p>
+            <pre className="text-sm text-left overflow-x-auto">
+              <code className="text-neutral-900 dark:text-neutral-100">{`function processOrder(userId: UserId, orderId: OrderId) {
+  await db.orders.findOne({ id: orderId })  // Correct
+}
 
-              <IdPill label="orderId" prefix="ord" accentColor="zinc" />
-            </div>
-
-            <code className="text-sm text-error">
-              Argument of type 'OrderId' is not assignable to parameter of type 'UserId'
-            </code>
+processOrder(order.id, user.id)
+// Type Error ✓ Caught at compile time`}</code>
+            </pre>
           </div>
         </div>
 
@@ -66,34 +65,36 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
             onClick={handleCopy}
-            className="px-8 py-3.5 rounded-lg bg-accent-primary hover:bg-accent-dark text-white font-semibold transition-all active:scale-95 shadow-lg hover:shadow-lg flex items-center gap-2"
+            className="px-8 py-3 bg-black text-white rounded-lg hover:bg-neutral-800 dark:bg-white dark:text-black dark:hover:bg-neutral-200 transition-colors font-medium flex items-center gap-2 active:scale-95"
           >
-            {copied ? '✓ Copied!' : 'npm install safeids'}
+            <Copy size={18} />
+            {copied ? 'Copied!' : 'npm install safeids'}
           </button>
 
           <a
             href="https://github.com/Abdul-Moiz31/safeids.dev"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-8 py-3.5 rounded-lg bg-bg-secondary hover:bg-bg-tertiary border border-border-subtle text-text-primary font-semibold transition-all"
+            className="px-8 py-3 border border-neutral-200 dark:border-neutral-800 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors font-medium flex items-center gap-2"
           >
-            View on GitHub →
+            <ExternalLink size={18} />
+            View on GitHub
           </a>
         </div>
 
         {/* Stats */}
-        <div className="mt-20 pt-12 border-t border-border-subtle flex flex-wrap justify-center gap-12">
+        <div className="grid grid-cols-3 gap-8 mt-16 pt-12 border-t border-neutral-200 dark:border-neutral-800">
           <div>
-            <div className="text-3xl font-bold text-accent-primary">0 bytes</div>
-            <p className="text-text-tertiary text-sm mt-2">Runtime overhead</p>
+            <div className="text-2xl font-bold">0 bytes</div>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">Runtime overhead</p>
           </div>
           <div>
-            <div className="text-3xl font-bold text-accent-primary">100%</div>
-            <p className="text-text-tertiary text-sm mt-2">Type safety</p>
+            <div className="text-2xl font-bold">100%</div>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">Type safe</p>
           </div>
           <div>
-            <div className="text-3xl font-bold text-accent-primary">20</div>
-            <p className="text-text-tertiary text-sm mt-2">Tests passing</p>
+            <div className="text-2xl font-bold">20+</div>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">Tests passing</p>
           </div>
         </div>
       </div>
