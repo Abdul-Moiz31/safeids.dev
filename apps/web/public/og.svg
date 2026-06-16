@@ -1,0 +1,70 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#09090B"/>
+
+  <!-- Gradient overlay -->
+  <defs>
+    <radialGradient id="grad" cx="50%" cy="0%" r="70%">
+      <stop offset="0%" style="stop-color:#6366F1;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#6366F1;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grad)"/>
+
+  <!-- Main text -->
+  <text x="600" y="200" font-size="80" font-weight="700" text-anchor="middle" fill="#FAFAFA" font-family="Inter, sans-serif">
+    safeids
+  </text>
+
+  <!-- Subheading -->
+  <text x="600" y="310" font-size="42" text-anchor="middle" fill="#A1A1AA" font-family="Inter, sans-serif">
+    Stop passing the wrong ID
+  </text>
+
+  <!-- Type comparison -->
+  <g>
+    <!-- Left box - Wrong -->
+    <rect x="100" y="380" width="400" height="180" fill="#EF4444" fill-opacity="0.1" stroke="#EF4444" stroke-width="2" rx="8"/>
+    <text x="300" y="410" font-size="16" font-weight="600" text-anchor="middle" fill="#EF4444" font-family="Inter, sans-serif">
+      ❌ Before
+    </text>
+    <text x="120" y="450" font-size="14" fill="#FCA5A5" font-family="JetBrains Mono, monospace">
+      processOrder(
+    </text>
+    <text x="120" y="480" font-size="14" fill="#FCA5A5" font-family="JetBrains Mono, monospace">
+        userId: string
+    </text>
+    <text x="120" y="510" font-size="14" fill="#FCA5A5" font-family="JetBrains Mono, monospace">
+      )
+    </text>
+    <text x="120" y="540" font-size="12" fill="#EF4444" font-family="Inter, sans-serif">
+      Swapped args, silent bug
+    </text>
+  </g>
+
+  <!-- Right box - Correct -->
+  <g>
+    <!-- Right box - Correct -->
+    <rect x="700" y="380" width="400" height="180" fill="#22C55E" fill-opacity="0.1" stroke="#22C55E" stroke-width="2" rx="8"/>
+    <text x="900" y="410" font-size="16" font-weight="600" text-anchor="middle" fill="#22C55E" font-family="Inter, sans-serif">
+      ✅ After
+    </text>
+    <text x="720" y="450" font-size="14" fill="#86EFAC" font-family="JetBrains Mono, monospace">
+      processOrder(
+    </text>
+    <text x="720" y="480" font-size="14" fill="#86EFAC" font-family="JetBrains Mono, monospace">
+        userId: UserId
+    </text>
+    <text x="720" y="510" font-size="14" fill="#86EFAC" font-family="JetBrains Mono, monospace">
+      )
+    </text>
+    <text x="720" y="540" font-size="12" fill="#22C55E" font-family="Inter, sans-serif">
+      Type error at compile time
+    </text>
+  </g>
+
+  <!-- Footer -->
+  <text x="600" y="600" font-size="14" text-anchor="middle" fill="#52525B" font-family="Inter, sans-serif">
+    Branded types for TypeScript • Zero runtime cost • Full type safety
+  </text>
+</svg>
