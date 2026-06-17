@@ -15,9 +15,7 @@ export function Nav() {
 
       <div className="relative flex items-center gap-6 text-sm text-white/50">
         <a
-          href="https://github.com/Abdul-Moiz31/safeids.dev"
-          target="_blank"
-          rel="noopener noreferrer"
+          href="/docs"
           className="hover:text-white transition-colors"
         >
           Docs
