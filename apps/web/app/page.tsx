@@ -8,6 +8,45 @@ import { EntityBuilder } from '@/components/EntityBuilder'
 import { CodeOutput } from '@/components/CodeOutput'
 import { Playground } from '@/components/Playground'
 
+const DOC_LINKS = [
+  {
+    href: '/docs/getting-started',
+    icon: '⚡',
+    title: 'Getting Started',
+    desc: 'Install safeids and create your first branded ID in under two minutes. Works with Next.js, Remix, tRPC, Prisma — any TypeScript project.',
+  },
+  {
+    href: '/docs/concepts',
+    icon: '🧠',
+    title: 'How It Works',
+    desc: 'Understand phantom types and why Brand<string, "UserId"> is incompatible with Brand<string, "OrderId"> even though both are strings at runtime.',
+  },
+  {
+    href: '/docs/api',
+    icon: '📖',
+    title: 'API Reference',
+    desc: 'Full reference for createId, fromString, isId, brand, and Brand — with parameter tables, return types, and throws documentation.',
+  },
+  {
+    href: '/docs/zod',
+    icon: '🔐',
+    title: 'Zod Integration',
+    desc: 'Validate branded IDs at runtime using zodBrand. Perfect for API route handlers, tRPC procedures, and form validation.',
+  },
+  {
+    href: '/docs/examples',
+    icon: '💡',
+    title: 'Examples & Patterns',
+    desc: '7 copy-paste patterns: Prisma queries, Next.js API routes, React props, tRPC procedures, and a step-by-step migration guide.',
+  },
+  {
+    href: '/docs',
+    icon: '🗺️',
+    title: 'Full Documentation',
+    desc: 'Start here for an overview of what safeids solves, when to use it, and how to navigate the rest of the docs.',
+  },
+]
+
 const STARTER_ENTITIES: Entity[] = [
   { id: '1', name: 'User', fieldName: 'userId', prefix: 'usr' },
   { id: '2', name: 'Order', fieldName: 'orderId', prefix: 'ord' },
@@ -196,6 +235,51 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Documentation section ── */}
+      <section className="py-28 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="mb-12 text-center">
+            <p className="text-[10px] uppercase tracking-widest text-white/30 mb-3">Documentation</p>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+              Everything you need to know
+            </h2>
+            <p className="text-white/40 max-w-xl mx-auto">
+              Comprehensive guides from first install to production-ready patterns.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            {DOC_LINKS.map((doc) => (
+              <a
+                key={doc.href}
+                href={doc.href}
+                className="group relative rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6 hover:border-violet-500/30 hover:bg-white/[0.04] transition-all duration-300"
+              >
+                <div className="mb-3 inline-flex items-center justify-center w-9 h-9 rounded-xl bg-violet-500/10 text-violet-400 border border-violet-500/20 text-lg">
+                  {doc.icon}
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-1.5 group-hover:text-violet-300 transition-colors">
+                  {doc.title}
+                </h3>
+                <p className="text-xs text-white/40 leading-relaxed">{doc.desc}</p>
+                <span className="mt-3 inline-block text-xs text-violet-400/60 group-hover:text-violet-400 transition-colors">
+                  Read more →
+                </span>
+              </a>
+            ))}
+          </div>
+
+          <div className="text-center">
+            <a
+              href="/docs"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/15 bg-white/[0.04] text-white/70 hover:bg-white/[0.08] hover:text-white transition-all text-sm font-medium"
+            >
+              Browse all documentation →
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* ── Install CTA ── */}
       <section className="relative py-28 px-6 overflow-hidden">
         <div className="pointer-events-none absolute inset-0 bg-glow-violet opacity-80" />
@@ -226,9 +310,7 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <a
-              href="https://github.com/Abdul-Moiz31/safeids.dev"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/docs"
               className="px-8 py-3.5 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 text-white font-semibold text-sm hover:opacity-90 transition-opacity shadow-glow"
             >
               Read the docs
