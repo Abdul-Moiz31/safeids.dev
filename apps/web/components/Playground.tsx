@@ -24,18 +24,15 @@ type OrderId = brand<string, 'OrderId'>
 const userId  = createId<UserId>('usr')
 const orderId = createId<OrderId>('ord')
 
-// This function expects a UserId
 function getUser(id: UserId): void {
   console.log('Getting user:', id)
 }
 
 // BUG: passing orderId where userId is expected
-// Hover over the red underline below to see the error
 getUser(orderId)
-//      ^^^^^^^ Argument of type 'OrderId' is not assignable to parameter of type 'UserId'
+//      ^^^^^^^ hover to see the type error
 
-// This is correct:
-getUser(userId)
+getUser(userId) // correct
 `
 
 const BUG_FIX_CODE = `import { brand, createId } from 'safeids'
@@ -46,21 +43,16 @@ type OrderId = brand<string, 'OrderId'>
 const userId  = createId<UserId>('usr')
 const orderId = createId<OrderId>('ord')
 
-// This function expects a UserId
 function getUser(id: UserId): void {
   console.log('Getting user:', id)
 }
 
-// FIXED: passing userId where it's expected
-getUser(userId)
-//      ^^^^^^ ✓ Type-safe
-
-// OrderId stays with the correct function
 function getOrder(id: OrderId): void {
   console.log('Getting order:', id)
 }
 
-getOrder(orderId)
+getUser(userId)   // ✓
+getOrder(orderId) // ✓
 `
 
 export function Playground({ entities }: PlaygroundProps) {
@@ -69,44 +61,44 @@ export function Playground({ entities }: PlaygroundProps) {
   const [selectedSnippet, setSelectedSnippet] =
     useState<(typeof SAMPLE_SNIPPETS)[number]>('Basic ID mixup')
   const editorRef = useRef<any>(null)
-  const monacoRef = useRef<Monaco | null>(null)
 
   const generatedTypes = generateTypesCode(entities)
 
-  // Update type errors when code or entities change
   useEffect(() => {
     try {
       const env = setupTypeScriptEnvironment(code, generatedTypes)
-      const typeErrors = getTypeErrors(env)
-      setErrors(typeErrors)
-    } catch (err) {
-      console.error('Type checking error:', err)
+      setErrors(getTypeErrors(env))
+    } catch {
+      // silent
     }
   }, [code, generatedTypes])
 
   const handleEditorMount = (editor: any, monaco: Monaco) => {
     editorRef.current = editor
-    monacoRef.current = monaco
 
-    // Configure Monaco theme
-    monaco.editor.defineTheme('safeids-dark', {
+    monaco.editor.defineTheme('crypton', {
       base: 'vs-dark',
       inherit: true,
-      rules: [],
+      rules: [
+        { token: 'keyword', foreground: 'a78bfa' },
+        { token: 'string', foreground: '34d399' },
+        { token: 'comment', foreground: '4b5563', fontStyle: 'italic' },
+        { token: 'number', foreground: 'f9a8d4' },
+        { token: 'type', foreground: '67e8f9' },
+      ],
       colors: {
-        'editor.background': '#09090B',
-        'editor.foreground': '#FAFAFA',
-        'editorLineNumber.foreground': '#52525B',
-        'editorCursor.foreground': '#6366F1',
-        'editor.selectionBackground': '#3F3F4633',
-        'editorError.foreground': '#EF4444',
-        'editorError.squigglyLineBackground': '#EF444433',
+        'editor.background': '#050508',
+        'editor.foreground': '#e5e7eb',
+        'editorLineNumber.foreground': '#374151',
+        'editorCursor.foreground': '#7c5cfc',
+        'editor.selectionBackground': '#7c5cfc22',
+        'editorError.foreground': '#f87171',
+        'editorError.squigglyLineBackground': '#f8717133',
+        'editor.lineHighlightBackground': '#ffffff05',
       },
     })
+    monaco.editor.setTheme('crypton')
 
-    monaco.editor.setTheme('safeids-dark')
-
-    // Add safeids types as a library
     const libSource = [
       'declare const __brand: unique symbol',
       'export type Brand<T, TBrand extends string> = T & { readonly [__brand]: TBrand }',
@@ -116,29 +108,10 @@ export function Playground({ entities }: PlaygroundProps) {
       'export function isId<T extends Brand<string, string>>(val: unknown, prefix?: string): val is T',
     ].join('\n')
 
-    monaco.languages.typescript.typescriptDefaults.addExtraLib(libSource, 'node_modules/safeids/index.d.ts')
-  }
-
-  const handleCodeChange = (value: string | undefined) => {
-    if (value !== undefined) {
-      setCode(value)
-    }
-  }
-
-  const handleSnippetChange = (snippet: (typeof SAMPLE_SNIPPETS)[number]) => {
-    setSelectedSnippet(snippet)
-    const snippetCode = getSampleCode(snippet)
-    setCode(snippetCode)
-    // Reset the snippet after a brief delay for visual feedback
-    setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.layout()
-      }
-    }, 100)
-  }
-
-  const handleFixBug = () => {
-    setCode(BUG_FIX_CODE)
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      libSource,
+      'node_modules/safeids/index.d.ts',
+    )
   }
 
   const goToError = (line: number) => {
@@ -150,91 +123,87 @@ export function Playground({ entities }: PlaygroundProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-surface rounded-lg p-6 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-surface">
-        <h2 className="text-xs uppercase tracking-widest text-secondary font-semibold">Playground</h2>
-
+    <div className="h-full flex flex-col p-5">
+      {/* header row */}
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[10px] uppercase tracking-widest text-white/30 font-semibold">
+          Live Playground
+        </p>
         <div className="flex items-center gap-2">
-          <label className="text-xs uppercase tracking-wider text-tertiary">Snippet:</label>
           <select
             value={selectedSnippet}
-            onChange={(e) => handleSnippetChange(e.target.value as (typeof SAMPLE_SNIPPETS)[number])}
-            className="text-xs px-2 py-1 bg-black/50 border border-surface rounded text-secondary hover:text-primary cursor-pointer"
+            onChange={(e) => {
+              const s = e.target.value as (typeof SAMPLE_SNIPPETS)[number]
+              setSelectedSnippet(s)
+              setCode(getSampleCode(s))
+            }}
+            className="text-xs px-2 py-1 rounded-lg bg-white/[0.05] border border-white/[0.08] text-white/50 hover:text-white/80 cursor-pointer"
           >
-            {SAMPLE_SNIPPETS.map((snippet) => (
-              <option key={snippet} value={snippet}>
-                {snippet}
+            {SAMPLE_SNIPPETS.map((s) => (
+              <option key={s} value={s} className="bg-zinc-900">
+                {s}
               </option>
             ))}
           </select>
-
           <button
-            onClick={handleFixBug}
-            className="ml-2 text-xs px-3 py-1.5 bg-accent/10 text-accent rounded hover:bg-accent/20 transition-colors font-medium"
+            onClick={() => setCode(BUG_FIX_CODE)}
+            className="text-xs px-3 py-1 rounded-lg bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 transition-colors font-medium border border-violet-500/20"
           >
-            Fix the bug
+            Fix bug
           </button>
         </div>
       </div>
 
-      {/* Monaco Editor */}
-      <div className="flex-1 min-h-0 rounded-lg overflow-hidden border border-surface mb-4">
+      {/* editor */}
+      <div className="flex-1 min-h-0 rounded-xl overflow-hidden border border-white/[0.08] mb-3">
         <Editor
           height="100%"
           language="typescript"
           value={code}
-          onChange={handleCodeChange}
+          onChange={(v) => v !== undefined && setCode(v)}
           onMount={handleEditorMount}
-          theme="safeids-dark"
+          theme="crypton"
           options={{
             minimap: { enabled: false },
             lineNumbers: 'on',
-            scrollbar: { useShadows: false, verticalHasArrows: false },
-            fontSize: 13,
-            fontFamily: "'JetBrains Mono', monospace",
-            lineHeight: 1.6,
+            scrollbar: { useShadows: false },
+            fontSize: 12,
+            fontFamily: "'Geist Mono', 'JetBrains Mono', monospace",
+            lineHeight: 1.7,
             wordWrap: 'on',
             automaticLayout: true,
             tabSize: 2,
-            padding: { top: 16, bottom: 16 },
+            padding: { top: 14, bottom: 14 },
             scrollBeyondLastLine: false,
+            renderLineHighlight: 'line',
           }}
         />
       </div>
 
-      {/* Errors Panel */}
-      <div className="border-t border-surface pt-4">
+      {/* errors panel */}
+      <div className="rounded-xl border border-white/[0.06] bg-black/30 p-3 max-h-28 overflow-y-auto">
         {errors.length === 0 ? (
-          <div className="flex items-center gap-2">
-            <div className="text-xs px-2.5 py-1 bg-green-950 text-green-400 rounded-full font-mono font-medium">
-              ✓ No type errors
-            </div>
+          <div className="flex items-center gap-2 text-xs text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            No type errors
           </div>
         ) : (
-          <div className="space-y-2">
-            <div className="text-xs text-tertiary font-medium mb-2">
-              <span className="inline-block px-2 py-1 bg-red-950 text-red-400 rounded font-mono font-semibold">
-                {errors.length} {errors.length === 1 ? 'error' : 'errors'}
-              </span>
-            </div>
-
-            <div className="space-y-1 max-h-40 overflow-y-auto">
-              {errors.map((error, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => goToError(error.line)}
-                  className="w-full flex items-start gap-3 px-3 py-2 bg-black/30 hover:bg-black/50 rounded transition-colors text-left group cursor-pointer"
-                >
-                  <span className="text-xs font-mono font-bold text-accent mt-0.5 flex-shrink-0">
-                    {error.line}
-                  </span>
-                  <span className="text-xs text-secondary group-hover:text-primary transition-colors flex-1 break-words">
-                    {error.message}
-                  </span>
-                </button>
-              ))}
-            </div>
+          <div className="space-y-1">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider mb-2">
+              {errors.length} {errors.length === 1 ? 'error' : 'errors'}
+            </p>
+            {errors.map((err, i) => (
+              <button
+                key={i}
+                onClick={() => goToError(err.line)}
+                className="w-full flex items-start gap-3 text-left px-2 py-1.5 rounded-lg hover:bg-white/[0.04] transition-colors"
+              >
+                <span className="text-[10px] font-mono text-violet-400 flex-shrink-0 mt-0.5">
+                  L{err.line}
+                </span>
+                <span className="text-xs text-white/50">{err.message}</span>
+              </button>
+            ))}
           </div>
         )}
       </div>

@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import type { Entity } from '@/lib/types'
 
 interface EntityBuilderProps {
@@ -8,93 +7,67 @@ interface EntityBuilderProps {
   onEntitiesChange: (entities: Entity[]) => void
 }
 
-function suggestFieldName(entityName: string): string {
-  return entityName.charAt(0).toLowerCase() + entityName.slice(1) + 'Id'
+function suggestFieldName(name: string) {
+  return name.charAt(0).toLowerCase() + name.slice(1) + 'Id'
 }
-
-function suggestPrefix(entityName: string): string {
-  return entityName.slice(0, 3).toLowerCase()
+function suggestPrefix(name: string) {
+  return name.slice(0, 3).toLowerCase()
 }
 
 export function EntityBuilder({ entities, onEntitiesChange }: EntityBuilderProps) {
-  const handleEntityChange = (
-    id: string,
-    field: keyof Entity,
-    value: string,
-  ) => {
-    const updated = entities.map((e) => {
-      if (e.id !== id) return e
-      const updated = { ...e, [field]: value }
-
-      if (field === 'name') {
-        updated.fieldName = suggestFieldName(value)
-        updated.prefix = suggestPrefix(value)
-      }
-
-      return updated
-    })
-    onEntitiesChange(updated)
+  const handleChange = (id: string, field: keyof Entity, value: string) => {
+    onEntitiesChange(
+      entities.map((e) => {
+        if (e.id !== id) return e
+        const next = { ...e, [field]: value }
+        if (field === 'name') {
+          next.fieldName = suggestFieldName(value)
+          next.prefix = suggestPrefix(value)
+        }
+        return next
+      }),
+    )
   }
 
-  const handleRemove = (id: string) => {
-    onEntitiesChange(entities.filter((e) => e.id !== id))
-  }
+  const handleRemove = (id: string) => onEntitiesChange(entities.filter((e) => e.id !== id))
 
-  const handleAdd = () => {
-    const newEntity: Entity = {
-      id: Date.now().toString(),
-      name: '',
-      fieldName: '',
-      prefix: '',
-    }
-    onEntitiesChange([...entities, newEntity])
-  }
+  const handleAdd = () =>
+    onEntitiesChange([
+      ...entities,
+      { id: Date.now().toString(), name: '', fieldName: '', prefix: '' },
+    ])
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="pb-4 mb-4 border-b border-surface">
-        <h2 className="text-xs uppercase tracking-widest text-secondary font-semibold">Define your domain</h2>
-      </div>
+    <div className="h-full flex flex-col p-5">
+      <p className="text-[10px] uppercase tracking-widest text-white/30 font-semibold mb-4">
+        Define Domain
+      </p>
 
-      <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+      <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {entities.map((entity) => (
-          <div key={entity.id} className="bg-surface rounded-lg p-4 space-y-3">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-tertiary mb-1.5">Entity name</label>
-              <input
-                type="text"
-                value={entity.name}
-                onChange={(e) => handleEntityChange(entity.id, 'name', e.target.value)}
-                placeholder="e.g. User"
-                className="w-full px-3 py-2 bg-black/50 border border-surface rounded-md text-primary placeholder-tertiary focus-visible:outline-accent text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-tertiary mb-1.5">ID field name</label>
-              <input
-                type="text"
-                value={entity.fieldName}
-                onChange={(e) => handleEntityChange(entity.id, 'fieldName', e.target.value)}
-                placeholder="e.g. userId"
-                className="w-full px-3 py-2 bg-black/50 border border-surface rounded-md text-primary placeholder-tertiary focus-visible:outline-accent text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-tertiary mb-1.5">Prefix</label>
-              <input
-                type="text"
-                value={entity.prefix}
-                onChange={(e) => handleEntityChange(entity.id, 'prefix', e.target.value)}
-                placeholder="e.g. usr"
-                className="w-full px-3 py-2 bg-black/50 border border-surface rounded-md text-primary placeholder-tertiary focus-visible:outline-accent text-sm"
-              />
-            </div>
-
+          <div
+            key={entity.id}
+            className="rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 space-y-3"
+          >
+            {(['name', 'fieldName', 'prefix'] as const).map((field) => (
+              <div key={field}>
+                <label className="block text-[10px] uppercase tracking-wider text-white/30 mb-1.5">
+                  {field === 'name' ? 'Entity name' : field === 'fieldName' ? 'ID field' : 'Prefix'}
+                </label>
+                <input
+                  type="text"
+                  value={entity[field]}
+                  onChange={(e) => handleChange(entity.id, field, e.target.value)}
+                  placeholder={
+                    field === 'name' ? 'User' : field === 'fieldName' ? 'userId' : 'usr'
+                  }
+                  className="w-full px-3 py-2 rounded-lg bg-black/50 border border-white/[0.08] text-white/80 placeholder-white/20 text-sm focus:outline-none focus:border-violet-500/50 transition-colors"
+                />
+              </div>
+            ))}
             <button
               onClick={() => handleRemove(entity.id)}
-              className="w-full text-left px-3 py-1.5 text-sm text-red-400 hover:bg-red-950/30 rounded transition-colors"
+              className="w-full text-xs text-red-400/70 hover:text-red-400 hover:bg-red-500/10 py-1.5 rounded-lg transition-colors"
             >
               Remove
             </button>
@@ -104,7 +77,7 @@ export function EntityBuilder({ entities, onEntitiesChange }: EntityBuilderProps
 
       <button
         onClick={handleAdd}
-        className="mt-4 pt-4 border-t border-surface w-full px-4 py-2.5 bg-accent/10 text-accent rounded-lg hover:bg-accent/20 transition-colors text-sm font-medium"
+        className="mt-4 w-full py-2.5 rounded-xl border border-dashed border-white/[0.12] text-white/40 hover:text-white/70 hover:border-white/25 text-sm transition-colors"
       >
         + Add entity
       </button>

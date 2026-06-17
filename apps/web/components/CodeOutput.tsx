@@ -14,17 +14,13 @@ export function CodeOutput({ entities }: CodeOutputProps) {
 
   const getCode = () => {
     switch (activeTab) {
-      case 'types':
-        return generateTypesCode(entities)
-      case 'zod':
-        return generateZodCode(entities)
-      case 'migration':
-        return generateMigrationGuide(entities)
+      case 'types': return generateTypesCode(entities)
+      case 'zod': return generateZodCode(entities)
+      case 'migration': return generateMigrationGuide(entities)
     }
   }
 
   const code = getCode()
-  const isMigration = activeTab === 'migration'
 
   const handleCopy = () => {
     navigator.clipboard.writeText(code)
@@ -32,69 +28,48 @@ export function CodeOutput({ entities }: CodeOutputProps) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const handleStackBlitz = () => {
-    const codesnippet = encodeURIComponent(generateTypesCode(entities))
-    window.open(
-      `https://stackblitz.com/edit/nextjs-14-typescript?file=app%2Fpage.tsx&embedded=1&hideExplorer=true&preset=node&devToolsHeight=0`,
-      '_blank',
-    )
-  }
+  const tabs: { key: CodeTab; label: string }[] = [
+    { key: 'types', label: 'Types' },
+    { key: 'zod', label: 'Zod' },
+    { key: 'migration', label: 'Guide' },
+  ]
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Tabs */}
-      <div className="flex items-center gap-2 pb-4 mb-4 border-b border-surface overflow-x-auto">
-        {(['types', 'zod', 'migration'] as const).map((tab) => (
+    <div className="h-full flex flex-col p-5">
+      <p className="text-[10px] uppercase tracking-widest text-white/30 font-semibold mb-4">
+        Generated Code
+      </p>
+
+      {/* tabs */}
+      <div className="flex gap-1 mb-4 p-1 rounded-lg bg-white/[0.04] border border-white/[0.06]">
+        {tabs.map(({ key, label }) => (
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`text-xs uppercase tracking-wider px-3 py-1.5 rounded transition-all whitespace-nowrap font-medium ${
-              activeTab === tab
-                ? 'bg-accent text-white'
-                : 'text-secondary hover:text-primary'
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+              activeTab === key
+                ? 'bg-white/[0.10] text-white shadow-sm'
+                : 'text-white/40 hover:text-white/70'
             }`}
           >
-            {tab === 'types' && 'Types + IDs'}
-            {tab === 'zod' && 'Zod Schemas'}
-            {tab === 'migration' && 'Migration guide'}
+            {label}
           </button>
         ))}
       </div>
 
-      {/* Code Block */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        <div className="flex-1 overflow-y-auto">
-          {isMigration ? (
-            <div className="prose prose-invert text-sm space-y-4 pr-4">
-              <div className="text-secondary whitespace-pre-wrap font-mono text-xs leading-relaxed">
-                {code}
-              </div>
-            </div>
-          ) : (
-            <pre className="bg-black/50 p-4 rounded-lg overflow-x-auto text-xs leading-relaxed">
-              <code className="text-primary font-mono">{code}</code>
-            </pre>
-          )}
-        </div>
+      {/* code area */}
+      <div className="flex-1 overflow-y-auto rounded-xl bg-black/50 border border-white/[0.06] p-4 mb-4">
+        <pre className="text-xs leading-relaxed font-mono text-white/70 whitespace-pre-wrap break-words">
+          {code}
+        </pre>
       </div>
 
-      {/* Actions */}
-      <div className="flex gap-2 mt-4 pt-4 border-t border-surface">
-        <button
-          onClick={handleCopy}
-          className="flex-1 px-3 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-indigo-600 transition-colors active:scale-95"
-        >
-          {copied ? '✓ Copied!' : 'Copy'}
-        </button>
-        {!isMigration && (
-          <button
-            onClick={handleStackBlitz}
-            className="flex-1 px-3 py-2 bg-surface text-primary text-sm font-medium rounded-lg hover:bg-zinc-800 transition-colors border border-surface"
-          >
-            StackBlitz
-          </button>
-        )}
-      </div>
+      <button
+        onClick={handleCopy}
+        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 text-white text-sm font-semibold hover:opacity-90 transition-opacity"
+      >
+        {copied ? '✓ Copied!' : 'Copy code'}
+      </button>
     </div>
   )
 }
