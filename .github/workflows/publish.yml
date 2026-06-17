@@ -35,6 +35,6 @@ jobs:
         run: pnpm -F safeids test
 
       - name: Publish to npm
-        run: pnpm -F safeids publish --access public
+        run: pnpm -F safeids publish --access public --no-git-checks
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
