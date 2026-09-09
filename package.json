@@ -2,9 +2,12 @@
   "name": "safeids-monorepo",
   "private": true,
   "packageManager": "pnpm@10.34.1",
-  "workspaces": ["packages/*", "apps/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "node api.js && turbo dev",
     "build": "turbo build",
     "test": "turbo test"
   },
